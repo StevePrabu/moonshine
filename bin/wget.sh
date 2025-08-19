@@ -1,6 +1,7 @@
 #!/bin/bash -l
 #SBATCH --export=NONE
-#SBATCH -p workq
+#SBATCH --account=mwasci
+#SBATCH --partitio=mwa
 #SBATCH --time=8:00:00
 #SBATCH --ntasks=6
 #SBATCH --mem=64GB
