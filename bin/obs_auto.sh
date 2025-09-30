@@ -12,7 +12,7 @@ obsnum=
 scratchID=
 cal=
 
-while getopts 'o:s:c' OPTION
+while getopts 'o:s:c:' OPTION
 do
     case "$OPTION" in
         o)
@@ -34,16 +34,19 @@ done
 # if obsid is empty then just pring help
 if [[ -z ${obsnum} ]]
 then
+    echo 'obsnum is missing'
     usage
 fi
 
 if [[ -z ${scratchID} ]]
 then
+    echo 'scratchID is missing'
     usage
 fi
 
 if [[ -z ${cal} ]]
 then
+    echo 'calibrator model is missing'
     usage
 fi
 

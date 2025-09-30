@@ -2,37 +2,70 @@
 #SBATCH --export=NONE
 #SBATCH --partition=mwa
 #SBATCH --account=mwasci
-#SBATCH --ntasks=28
-#SBATCH --mem=124GB
+#SBATCH --ntasks=8
+#SBATCH --mem=16GB
+#SBATCH --time=4:00:00
 
 ## load modules
-module load hyperdrive/0.6.1
 module load singularity/4.1.0-slurm
+shopt -s expand_aliases
+source /scratch/mwasci/sprabu/moonshine/aliases
 
-## step 1
-cp -r * /scratch/mwasci/sprabu/moonshine/processing/1384513256
+set -x
+{
 
-## step 2) ## aoflagger
-singularity exec /scratch/mwasci/sprabu/moonshine/containers/wsclean_2.10.0-build-1.sif aoflagger 1384513256.ms
+obsnum=OBSNUM
+base=BASE
+model=CAL
+scratchID=SCRATCHID
 
-## calibrate ## 
-singularity exec /scratch/mwasci/sprabu/moonshine/containers/hyperdrive_main.sif \
-hyperdrive di-calibrate -d 1384513256.ms 1384513256.metafits \
--s ../../models/model-3C444-10comp_withalpha.txt -o round1.bin \
---uvw-min 100m --uvw-max 2000m --beam-file /scratch/mwasci/sprabu/moonshine/containers/mwa_full_embedded_element_pattern.h5
+cd ${base}/processing
 
-##  make calibration solutions
-singularity exec /scratch/mwasci/sprabu/moonshine/containers/hyperdrive_main.sif\
- hyperdrive solutions-plot round1.bin
+## create folder
+if [ -d "${obsnum}" ]; then
+  echo "${obsnum} folder does exist."
+else
+  mkdir ${obsnum}
+fi
 
-## apply solutions
-singularity exec /scratch/mwasci/sprabu/moonshine/containers/hyperdrive_main.sif 
-    hyperdrive solutions-apply --data round1.bin 1384513256.ms --outputs calibrated.ms
+cd ${obsnum}
 
-## imaging
-singularity exec /scratch/mwasci/sprabu/moonshine/containers/wsclean_2.10.0-build-1.sif \
-wsclean -name test -size 1400 1400 -scale 20asec -weight natural\
- -niter 1000 -mgain 0.8 calibrated.ms/
+## copy data using scratch id
+if [ -d "${obsnum}.ms" ]; then
+  echo "measurement set already exists."
+else
+  cp -r /scratch/mwasci/asvo/${scratchID}/* ${base}/processing/${obsnum}
+fi
+
+## step 1) run aoflagger
+aoflagger ${obsnum}.ms
+
+## step 2) calibrate using source model
+calibrate -d ${obsnum}.ms ${obsnum}.metafits -s ../../models/model-${model}-*_withalpha.txt \
+    -o round1.bin --uvw-min 100m --uvw-max 2000m \
+    --beam-file /scratch/mwasci/sprabu/moonshine/containers/mwa_full_embedded_element_pattern.h5
+
+## step 3) plot calibration solution
+plotsolution round1.bin
+
+## step 4) apply solutions
+applysolution --data round1.bin ${obsnum}.ms \
+    --outputs calibrated.ms
+
+## step 5) imaging
+wsclean -name ${obsnum}-img-narrowband -size 1400 1400 -scale 40asec -weight briggs 1\
+ -niter 10000 -mgain 0.8 -auto-threshold 1.3 -pol I -apply-primary-beam \
+ -mwa-path /scratch/mwasci/sprabu/moonshine/containers -channels-out 24 -circular-beam \
+  calibrated.ms/ 
+
+# wsclean -name ${obsnum}-img-wideband -size 1400 1400 -scale 40asec -weight briggs 1\
+#  -niter 50000 -mgain 0.8 -auto-threshold 1.3 -pol I -apply-primary-beam
+#  -mwa-path /scratch/mwasci/sprabu/moonshine/containers -circular-beam
+#   calibrated.ms/ 
+
+}
+
+
 
 
 
