@@ -2,9 +2,11 @@
 #SBATCH --export=NONE
 #SBATCH --partition=mwa
 #SBATCH --account=mwasci
-#SBATCH --ntasks=8
-#SBATCH --mem=16GB
-#SBATCH --time=4:00:00
+#SBATCH --ntasks=16
+#SBATCH --mem=64GB
+#SBATCH --time=10:00:00
+#SBATCH --mail-type FAIL,TIME_LIMIT
+#SBATCH --mail-user sirmcmissile47@gmail.com
 
 ## load modules
 module load singularity/4.1.0-slurm
