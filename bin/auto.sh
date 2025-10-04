@@ -4,7 +4,7 @@
 #SBATCH --account=mwasci
 #SBATCH --ntasks=16
 #SBATCH --mem=64GB
-#SBATCH --time=10:00:00
+#SBATCH --time=16:00:00
 #SBATCH --mail-type FAIL,TIME_LIMIT
 #SBATCH --mail-user sirmcmissile47@gmail.com
 
@@ -51,8 +51,8 @@ calibrate -d ${obsnum}.ms ${obsnum}.metafits -s ../../models/model-${model}-*_wi
 plotsolution round1.bin
 
 ## step 4) apply solutions
-applysolution --data round1.bin ${obsnum}.ms \
-    --outputs calibrated.ms
+applysolution --data ${obsnum}.metafits ${obsnum}.ms \
+  -s round1.bin --outputs calibrated.ms
 
 ## step 5) imaging
 wsclean -name ${obsnum}-img-narrowband -size 1400 1400 -scale 40asec -weight briggs 1\
