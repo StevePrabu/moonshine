@@ -4,11 +4,7 @@
 #SBATCH --account=mwasci
 #SBATCH --ntasks=16
 #SBATCH --mem=64GB
-<<<<<<< HEAD
 #SBATCH --time=20:00:00
-=======
-#SBATCH --time=16:00:00
->>>>>>> 39ff7cdf1eb8bcbcf68cc3ce7862ce12bdea98df
 #SBATCH --mail-type FAIL,TIME_LIMIT
 #SBATCH --mail-user sirmcmissile47@gmail.com
 
@@ -46,7 +42,6 @@ fi
 ## step 1) run aoflagger
 aoflagger ${obsnum}.ms
 
-<<<<<<< HEAD
 if [ -f "round1.bin" ]; then
   echo "calibration file already exits"
 else
@@ -75,24 +70,6 @@ fi
 wsclean -name ${obsnum}-img-narrowband -size 2000 2000 -scale 40asec -weight briggs 1\
  -niter 10000 -mgain 0.8 -auto-threshold 1.3 -pol I -apply-primary-beam \
  -mwa-path /scratch/mwasci/sprabu/moonshine/containers -channels-out 24 -maxuvw-m 2500 -circular-beam \
-=======
-## step 2) calibrate using source model
-calibrate -d ${obsnum}.ms ${obsnum}.metafits -s ../../models/model-${model}-*_withalpha.txt \
-    -o round1.bin --uvw-min 100m --uvw-max 2000m \
-    --beam-file /scratch/mwasci/sprabu/moonshine/containers/mwa_full_embedded_element_pattern.h5
-
-## step 3) plot calibration solution
-plotsolution round1.bin
-
-## step 4) apply solutions
-applysolution --data ${obsnum}.metafits ${obsnum}.ms \
-  -s round1.bin --outputs calibrated.ms
-
-## step 5) imaging
-wsclean -name ${obsnum}-img-narrowband -size 1400 1400 -scale 40asec -weight briggs 1\
- -niter 10000 -mgain 0.8 -auto-threshold 1.3 -pol I -apply-primary-beam \
- -mwa-path /scratch/mwasci/sprabu/moonshine/containers -channels-out 24 -circular-beam \
->>>>>>> 39ff7cdf1eb8bcbcf68cc3ce7862ce12bdea98df
   calibrated.ms/ 
 
 # wsclean -name ${obsnum}-img-wideband -size 1400 1400 -scale 40asec -weight briggs 1\
