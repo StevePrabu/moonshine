@@ -3,4 +3,7 @@ alias aoflagger='singularity exec /scratch/mwasci/sprabu/moonshine/containers/ao
 alias calibrate='singularity exec /scratch/mwasci/sprabu/moonshine/containers/hyperdrive_main.sif hyperdrive di-calibrate'
 alias applysolution='singularity exec /scratch/mwasci/sprabu/moonshine/containers/hyperdrive_main.sif hyperdrive solutions-apply'
 alias plotsolution='singularity exec /scratch/mwasci/sprabu/moonshine/containers/hyperdrive_main.sif hyperdrive solutions-plot'
+alias aocal='singularity exec /scratch/mwasci/sprabu/moonshine/containers/ao_cal_first.sif calibrate'
+alias ao_applysol='singularity exec /scratch/mwasci/sprabu/moonshine/containers/ao_cal_first.sif applysolutions'
+
 

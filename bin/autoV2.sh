@@ -2,9 +2,9 @@
 #SBATCH --export=NONE
 #SBATCH --partition=mwa
 #SBATCH --account=mwasci
-#SBATCH --ntasks=16
-#SBATCH --mem=64GB
-#SBATCH --time=22:00:00
+#SBATCH --ntasks=32
+#SBATCH --mem=128GB
+#SBATCH --time=24:00:00
 #SBATCH --mail-type FAIL,TIME_LIMIT
 #SBATCH --mail-user sirmcmissile47@gmail.com
 
@@ -66,17 +66,28 @@ else
   -s round1.bin --outputs calibrated.ms
 fi
 
+### self cal
+wsclean -name selfcal -size 1000 1000 -scale 50asec -weight natural \
+  -niter 10000 -mgain 0.2 -auto-threshold 1.5 -pol I -apply-primary-beam \
+  -mwa-path /scratch/mwasci/sprabu/moonshine/containers -maxuvw-m 2000 \
+  -minuvw-m 50 -circular-beam calibrated.ms/ 
+
+aocal -absmem 120 -minuv 50 -maxuv 2000 -ch 4 \
+  -applybeam -mwa-path /pawsey/mwa calibrated.ms selfcal.bin
+
+ao_applysol calibrated.ms selfcal.bin
+
 ## step 5) imaging
 wsclean -name ${obsnum}-img-narrowband -size 2000 2000 -scale 50asec -weight natural\
  -niter 10000 -mgain 0.2 -auto-threshold 1.5 -pol I -apply-primary-beam \
- -mwa-path /scratch/mwasci/sprabu/moonshine/containers -channels-out 24 -maxuvw-m 2000 -minuvw-m 20 -circular-beam \
+ -mwa-path /scratch/mwasci/sprabu/moonshine/containers -channels-out 24 -maxuvw-m 2000 -circular-beam \
   calibrated.ms/ 
-## use briggs 1
 
-# wsclean -name ${obsnum}-img-wideband -size 1400 1400 -scale 40asec -weight briggs 1\
-#  -niter 50000 -mgain 0.8 -auto-threshold 1.3 -pol I -apply-primary-beam
-#  -mwa-path /scratch/mwasci/sprabu/moonshine/containers -circular-beam
-#   calibrated.ms/ 
+## step 6) create 3C444 mask
+
+## step 7) make 3C444 only image (used for peeling)
+
+
 
 }
 
